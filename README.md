@@ -132,7 +132,7 @@ To fix this:
 - I found that after reverting changes just using the pc eventually fixes itself, or leaving it off overnight.
 
 
-### Enable freesync
+## Enable freesync
 ```sh
 sudo kernelstub -a "amdgpu.freesync_video=1"
 ```
