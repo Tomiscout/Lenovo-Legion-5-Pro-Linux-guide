@@ -6,6 +6,10 @@
 ## Other guides:
 https://github.com/cszach/linux-on-lenovo-legion?tab=readme-ov-file
 
+## Laptop speakers
+To make laptop speakers have better quality, you can extract impulse response information from Windows. I used [https://github.com/shuhaowu/linux-thinkpad-speaker-improvements](this guide) to extract `.irs` file for my laptop, but any laptop works for this.
+To use .irs file set up any kind of effects software with convolver (PulseEffects/JamesDSP/...) and import .irs file to the convolver.
+
 ## Fixing refresh rate for hybrid mode (Wayland)
 Currently, AMD iGPU driver generates wrong EDID file (Extended Display Identification Data), but when on Nvidia graphics discrete mode (mux), or windows - it works correctly. This solution also often fixes missing resolutions or not working displays.
 
@@ -28,8 +32,14 @@ This works for Pop! OS (22.04) on Wayland.
 sudo cp from-linux.bin /usr/lib/firmware/edid/from-linux.bin
 ```
 - Add EDID file in kernel boot options (either systemd-boot or edit grub, whichever you have)
+Systemd-boot:
 ```sh
 sudo kernelstub -a "drm.edid_firmware=eDP-1:edid/from-linux.bin"
+```
+Grub:
+```sh
+sudo nvim /etc/default/grub
+sudo update-grub
 ```
 
 #### 3. Update initramfs
