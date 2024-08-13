@@ -7,8 +7,16 @@
 https://github.com/cszach/linux-on-lenovo-legion?tab=readme-ov-file
 
 ## Laptop speakers
-To make laptop speakers have better quality, you can extract impulse response information from Windows. I used [https://github.com/shuhaowu/linux-thinkpad-speaker-improvements](this guide) to extract `.irs` file for my laptop, but any laptop works for this.
-To use .irs file set up any kind of effects software with convolver (PulseEffects/JamesDSP/...) and import .irs file to the convolver.
+To make laptop speakers have better quality (to match sound in Windows), you can extract impulse response information from Windows. I used [https://github.com/shuhaowu/linux-thinkpad-speaker-improvements](this guide) to extract `.irs` file for my laptop, but any laptop works for this.
+To use .irs file set up any kind of sound effects software with convolver (PulseEffects/JamesDSP/...) and import .irs file to the convolver. Remember to select IR optimization if available to reduce sound latency, because raw sample makes latency very noticable.
+
+## Hybernate/Sleep fix
+By default, it may not suspend pc correctly, notifying it in dmesg that it fails to unload Nvidia drivers. To fix you need to enable nvidia suspend services. [https://bbs.archlinux.org/viewtopic.php?id=288181](Source)
+```sh
+sudo systemctl enable nvidia-suspend.service
+sudo systemctl enable nvidia-hibernate.service
+sudo systemctl enable nvidia-resume.service
+```
 
 ## Fixing refresh rate for hybrid mode (Wayland)
 Currently, AMD iGPU driver generates wrong EDID file (Extended Display Identification Data), but when on Nvidia graphics discrete mode (mux), or windows - it works correctly. This solution also often fixes missing resolutions or not working displays.
