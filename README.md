@@ -1,27 +1,48 @@
 
 # Lenovo Legion 5 Pro (16ACH6H) guide for linux setup
 
+## Table of Contents
+
+1. [Existing guides](#1-existing-guides)
+2. [Laptop speakers](#2-laptop-speakers)
+3. [Hybernate/Sleep fix](#3-hybernatesleep-fix)
+4. [Enable freesync](#4-enable-freesync)
+5. [Fixing refresh rate for hybrid mode (Wayland)](#5-fixing-refresh-rate-for-hybrid-mode-wayland)
+   - [Getting EDID file](#51-getting-edid-file)
+   - [Placing EDID file](#52-placing-edid-file)
+   - [Update initramfs](#53-update-initramfs)
+     - [Option 1: initramfs-tools](#option-1-initramfs-tools)
+     - [Option 2: mkinitcpio.conf](#option-2-mkinitcpioconf)
+   - [Optional solution (don't recommend)](#54-optional-solution-dont-recommend)
+
+
+
+## 1. Existing guides:
 - [Lenovo Legion Linux](https://github.com/johnfanv2/LenovoLegionLinux) is for various sensors, drivers, power modes, fan curves and other legion specific stuff
+- https://github.com/cszach/linux-on-lenovo-legion?tab=readme-ov-file
 
-## Other guides:
-https://github.com/cszach/linux-on-lenovo-legion?tab=readme-ov-file
 
-## Laptop speakers
-To make laptop speakers have better quality (to match sound in Windows), you can extract impulse response information from Windows. I used [https://github.com/shuhaowu/linux-thinkpad-speaker-improvements](this guide) to extract `.irs` file for my laptop, but any laptop works for this.
+## 2. Laptop speakers
+To make laptop speakers have better quality (to match sound in Windows), you can extract impulse response information from Windows. I used [this guide](https://github.com/shuhaowu/linux-thinkpad-speaker-improvements) to extract `.irs` file for my laptop, but any laptop works for this.
 To use .irs file set up any kind of sound effects software with convolver (PulseEffects/JamesDSP/...) and import .irs file to the convolver. Remember to select IR optimization if available to reduce sound latency, because raw sample makes latency very noticable.
 
-## Hybernate/Sleep fix
-By default, it may not suspend pc correctly, notifying it in dmesg that it fails to unload Nvidia drivers. To fix you need to enable nvidia suspend services. [https://bbs.archlinux.org/viewtopic.php?id=288181](Source)
+## 3. Hybernate/Sleep fix
+By default, it may not suspend pc correctly, notifying it in `dmesg` that it fails to unload Nvidia drivers. To fix you need to enable Nvidia suspend services. [Source](https://bbs.archlinux.org/viewtopic.php?id=288181)
 ```sh
 sudo systemctl enable nvidia-suspend.service
 sudo systemctl enable nvidia-hibernate.service
 sudo systemctl enable nvidia-resume.service
 ```
 
-## Fixing refresh rate for hybrid mode (Wayland)
+## 4. Enable freesync
+```sh
+sudo kernelstub -a "amdgpu.freesync_video=1"
+```
+
+## 5. Fixing refresh rate for hybrid mode (Wayland)
 Currently, AMD iGPU driver generates wrong EDID file (Extended Display Identification Data), but when on Nvidia graphics discrete mode (mux), or windows - it works correctly. This solution also often fixes missing resolutions or not working displays.
 
-#### 1. Getting EDID file
+#### 5.1 Getting EDID file
 You can get it either from running discrete GPU mode and take it from `/sys/class/drm/*/edid` or boot to Windows and export it from there. I added my laptop's EDID files.
 
 - Use this script to list currently available display ports (disconnect external displays beforehand).
@@ -30,7 +51,7 @@ for p in /sys/class/drm/*/status; do con=${p%/status}; echo -n "${con#*/card?-}:
 ```
 Find your laptop's display port name, mine was `eDP-1`, switching distros could change it.
 
-#### 2. Placing EDID file
+#### 5.2 Placing EDID file
 More info in [Arch wiki - Forcing modes and EDID](https://wiki.archlinux.org/title/kernel_mode_setting#Forcing_modes_and_EDID)
 
 This works for Pop! OS (22.04) on Wayland.
@@ -50,7 +71,7 @@ sudo nvim /etc/default/grub
 sudo update-grub
 ```
 
-#### 3. Update initramfs
+#### 5.3 Update initramfs
 Ubuntu based distros use initramfs-tools, while others may use mkinitcpio.conf
 #### Option 1: initramfs-tools
 Create hook file `/etc/initramfs-tools/hooks/edid`
@@ -134,7 +155,8 @@ sudo reboot
 ```
 
 
-**Optional solution (dont recommend):** You can also directly create new resolution mode in the grub/systemd-boot. You should't use this if EDID method works.
+### 5.4 Optional solution (don't recommend)
+ You can also directly create new resolution mode in the grub/systemd-boot. You should't use this if EDID method works.
 
 
 - systemd-boot:
@@ -149,8 +171,3 @@ To fix this:
 - You can try this, but wont always work: Disable battery in bios / plug out battery, take out AC, hold power button for few seconds and wait a few minutes.
 - I found that after reverting changes just using the pc eventually fixes itself, or leaving it off overnight.
 
-
-## Enable freesync
-```sh
-sudo kernelstub -a "amdgpu.freesync_video=1"
-```
