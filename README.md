@@ -171,3 +171,10 @@ To fix this:
 - You can try this, but wont always work: Disable battery in bios / plug out battery, take out AC, hold power button for few seconds and wait a few minutes.
 - I found that after reverting changes just using the pc eventually fixes itself, or leaving it off overnight.
 
+### 6. Shutdown script (KDE Brave fix)
+This is not lenovo specific, but rather KDE+Brave. On shutdown/restart it doesn't kill brave correctly, losing the current session. Systemd methods doesn't work, but KDE hook works here.
+```sh
+mkdir -p ~/.config/plasma-workspace/shutdown/
+cp pre-shutdown.sh ~/.config/plasma-workspace/shutdown/pre-shutdown.sh
+chmod +x ~/.config/plasma-workspace/shutdown/pre-shutdown.sh
+```
