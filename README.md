@@ -18,13 +18,16 @@
 
 
 ## 1. Existing guides:
-- [Lenovo Legion Linux](https://github.com/johnfanv2/LenovoLegionLinux) is for various sensors, drivers, power modes, fan curves and other legion specific stuff
+- [Lenovo Legion Linux](https://github.com/johnfanv2/LenovoLegionLinux) is for various sensors, drivers, power modes, fan curves and other legion specific stuff.
+- [Plasma vantage](https://store.kde.org/p/2150610) is a plasma widget for controling Legion specific settings.
 - https://github.com/cszach/linux-on-lenovo-legion?tab=readme-ov-file
 
 
 ## 2. Laptop speakers
 To make laptop speakers have better quality (to match sound in Windows), you can extract impulse response information from Windows. I used [this guide](https://github.com/shuhaowu/linux-thinkpad-speaker-improvements) to extract `.irs` file for my laptop, but any laptop works for this.
-To use .irs file set up any kind of sound effects software with convolver (PulseEffects/JamesDSP/...) and import .irs file to the convolver. Remember to select IR optimization if available to reduce sound latency, because raw sample makes latency very noticable.
+To use .irs file set up any kind of sound effects software with convolver (EasyEffects/JamesDSP/...) and import .irs file to the convolver. Longer .irs files (500ms+) create noticable playback delay. Personaly I use 100ms sample with fade in and fade out applied to the irs.
+#### 2.1 EasyEffects profile
+I've added my profile for easy effects. After importing it you need to manually add correct .irs file in the convolver.
 
 ## 3. Hybernate/Sleep fix
 By default, it may not suspend pc correctly, notifying it in `dmesg` that it fails to unload Nvidia drivers. To fix you need to enable Nvidia suspend services. [Source](https://bbs.archlinux.org/viewtopic.php?id=288181)
@@ -33,6 +36,7 @@ sudo systemctl enable nvidia-suspend.service
 sudo systemctl enable nvidia-hibernate.service
 sudo systemctl enable nvidia-resume.service
 ```
+This makes it more stable, but laptop sometimes can't resume from sleep if it's on battery.
 
 ## 4. Enable freesync
 ```sh
@@ -43,12 +47,14 @@ sudo kernelstub -a "amdgpu.freesync_video=1"
 Currently, AMD iGPU driver generates wrong EDID file (Extended Display Identification Data), but when on Nvidia graphics discrete mode (mux), or windows - it works correctly. This solution also often fixes missing resolutions or not working displays.
 
 #### 5.1 Getting EDID file
-You can get it either from running discrete GPU mode and take it from `/sys/class/drm/*/edid` or boot to Windows and export it from there. I added my laptop's EDID files.
+You can get it either from running discrete GPU mode and take it from `/sys/class/drm/*/edid`. I added my laptop's EDID files.
+Also it's possible to export it from Windows, but need to additionaly patch the file with updated checksum, or linux kernel wont load it. 
 
 - Use this script to list currently available display ports (disconnect external displays beforehand).
 ```sh
 for p in /sys/class/drm/*/status; do con=${p%/status}; echo -n "${con#*/card?-}: "; cat $p; done
-```
+```sudo chmod +x /usr/local/bin/code
+
 Find your laptop's display port name, mine was `eDP-1`, switching distros could change it.
 
 #### 5.2 Placing EDID file
@@ -178,3 +184,4 @@ mkdir -p ~/.config/plasma-workspace/shutdown/
 cp pre-shutdown.sh ~/.config/plasma-workspace/shutdown/pre-shutdown.sh
 chmod +x ~/.config/plasma-workspace/shutdown/pre-shutdown.sh
 ```
+Optional: Go to `Settings -> Autostart -> Logout script` to add it from settings app.
