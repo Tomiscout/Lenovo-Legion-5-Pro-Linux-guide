@@ -1,4 +1,4 @@
-This is a guide on how to install custom edid file to linux.
+This is a guide on how to install custom edid file on linux.
 
 #### 1. Getting EDID file
 
@@ -8,12 +8,13 @@ Use this script to list currently available display ports (disconnect external d
 for p in /sys/class/drm/*/status; do con=${p%/status}; echo -n "${con#*/card?-}: "; cat $p; done
 ```
 Find your laptop's display port name. For laptop displays its usually `eDP-1`
+
 Extract the file
 ```sh
 sudo cp /sys/class/drm/eDP-1/edid ~/edid.bin
 ```
 
-For me when running in Nvidia discrete GPU mode - resolutions and refresh rates were fine, so you can extract it its same for you. 
+For me when running in Nvidia discrete GPU mode - resolutions and refresh rates were fine, so you can extract it its same for you. Then you can apply it when running on hybrid mode.
 
 Also it's possible to export it from Windows, but need to additionaly patch the file with updated checksum, or linux kernel wont load it. 
 
