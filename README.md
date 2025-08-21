@@ -62,3 +62,33 @@ cp pre-shutdown.sh ~/.config/plasma-workspace/shutdown/pre-shutdown.sh
 chmod +x ~/.config/plasma-workspace/shutdown/pre-shutdown.sh
 ```
 Optional: Go to `Settings -> Autostart -> Logout script` to add it from settings app.
+
+### 7. Video hardware decoding in Chromium browsers
+[Arch Wiki - Chromium](https://wiki.archlinux.org/title/Chromium#Hardware_video_acceleration)
+By default arch install may not have VDPAU driver `libva-nvidia-driver` installed, so some browsers can't use it to accelerate HW video decoding. Firefox had no problems for me.
+
+You can go through verification steps in the [Arch wiki](https://wiki.archlinux.org/title/Hardware_video_acceleration#Translation_layers) to get it working.
+```sh
+#verify if VDPAU works
+sudo pacman -Sy libva-utils
+vainfo # lists supported codecs
+
+#install missing driver if needed
+sudo pacman -Sy libva-nvidia-driver
+```
+
+After this you can play with browser flags, as VAAPI may need to be enabled.
+To test run from terminal:
+```sh
+brave --enable-features=AcceleratedVideoDecodeLinuxGL,AcceleratedVideoDecodeLinuxZeroCopyGL,VaapiOnNvidiaGPUs,VaapiIgnoreDriverChecks
+```
+
+Verify with nvtop and see if `DEC[  0%]` appears next to memory when watching a video.
+
+To persist flags:
+`nvim ~/.config/brave-flags.conf` or your equivalent
+```sh
+--enable-features=AcceleratedVideoDecodeLinuxGL,AcceleratedVideoDecodeLinuxZeroCopyGL,VaapiOnNvidiaGPUs,VaapiIgnoreDriverChecks
+```
+
+Warning: `libva-nvidia-driver` may break on Nvidia driver updates, as it uses unstable API's to use NVDEC. Follow info [in projects Github](https://github.com/elFarto/nvidia-vaapi-driver)

@@ -2,7 +2,6 @@ This is a guide on how to install custom edid file on linux.
 
 #### 1. Getting EDID file
 
-
 Use this script to list currently available display ports (disconnect external displays beforehand).
 ```sh
 for p in /sys/class/drm/*/status; do con=${p%/status}; echo -n "${con#*/card?-}: "; cat $p; done
@@ -16,7 +15,13 @@ sudo cp /sys/class/drm/eDP-1/edid ~/edid.bin
 
 For me when running in Nvidia discrete GPU mode - resolutions and refresh rates were fine, so you can extract it its same for you. Then you can apply it when running on hybrid mode.
 
-Also it's possible to export it from Windows, but need to additionaly patch the file with updated checksum, or linux kernel wont load it. 
+Also it's possible to export it from Windows, but need to additionaly patch the file with updated checksum, or linux kernel won't load it. 
+
+To fix the checksum you can try this script that fixes the checksum. As the edid file is fetched from the monitor panel, bad signal integrity may flip some bytes and checksum fails.
+```sh
+/edid/edidFixer/edidFixer broken.edid fixed.edid
+```
+
 
 I've included my laptop's EDID files.
 
@@ -147,7 +152,11 @@ sudo nvim /efi/loader/entries/<your_entry>.conf
 options ... drm.edid_firmware=eDP-1:edid/from-linux.bin
 ```
 
-
+### 5. Troubleshooting
+If it doesn't work - check dmesg logs
+```sh
+sudo dmesg | grep -i edid 
+```
 
 # Optional solution, don't recommend
  You can also directly create new resolution mode in the grub/systemd-boot. You should't use this if EDID method works.
