@@ -65,7 +65,7 @@ Optional: Go to `Settings -> Autostart -> Logout script` to add it from settings
 
 ### 7. Video hardware decoding in Chromium browsers
 [Arch Wiki - Chromium](https://wiki.archlinux.org/title/Chromium#Hardware_video_acceleration)
-By default arch install may not have VDPAU driver `libva-nvidia-driver` installed, so some browsers can't use it to accelerate HW video decoding. Firefox had no problems for me.
+By default arch install may not have VDPAU driver `libva-nvidia-driver` installed, so some browsers can't use it to accelerate HW video decoding.
 
 You can go through verification steps in the [Arch wiki](https://wiki.archlinux.org/title/Hardware_video_acceleration#Translation_layers) to get it working.
 ```sh
