@@ -125,7 +125,7 @@ sudo reboot
 Create config file to install edid file
 ```sh
 sudo tee "/etc/dracut.conf.d/00-legion5-edid.conf" > /dev/null <<'EOF'
-install_items+="/usr/lib/firmware/edid/from-linux.bin"
+install_items+=" /usr/lib/firmware/edid/from-linux.bin "
 EOF
 ```
 Then regenerate dracut
