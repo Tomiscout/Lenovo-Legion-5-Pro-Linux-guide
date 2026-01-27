@@ -96,7 +96,7 @@ To persist flags:
 Warning: `libva-nvidia-driver` may break on Nvidia driver updates, as it uses unstable APIs to use NVDEC. Follow info [in projects Github](https://github.com/elFarto/nvidia-vaapi-driver)
 
 #### 7.1 libva-nvidia-driver VP8 issue manual fix
-As of today VP8 videos in chromium are showing green corrupted video (Google Meets/Steam/Other) when using `AcceleratedVideoDecodeLinuxZeroCopyGL` option, but the bug is fixed in the master branch of the driver (still waiting for the release). So just need to build the driver manually instead of using one from the repository. Issue should be fixed when new driver version releases and is greater than `0.0.14`
+As of today VP8 codec videos in chromium are showing up green and corrupted (Google Meets/Steam/Other) when using `AcceleratedVideoDecodeLinuxZeroCopyGL` option, but the bug is fixed in the master branch of the driver (still waiting for the release). So just need to build the driver manually instead of using one from the repository. Issue should be fixed when new driver version releases and is greater than `0.0.14`
 
 ```sh
 #remove driver if its already installed
@@ -111,5 +111,5 @@ sudo ninja -C build install
 
 #when upstream is fixed - remove the driver and reinstall from repository
 sudo rm -f /usr/lib/dri/nvidia_drv_video.so
-sudo pacman -R libva-nvidia-driver
+sudo pacman -S libva-nvidia-driver
 ```
