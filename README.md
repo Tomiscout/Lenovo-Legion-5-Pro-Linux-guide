@@ -5,44 +5,46 @@
 
 1. [Existing guides](#1-existing-guides)
 2. [Laptop speakers](#2-laptop-speakers)
-3. [Hybernate/Sleep fix](#3-hybernatesleep-fix)
+3. [Hibernate/Sleep fix](#3-hibernatesleep-fix)
 4. [Enable freesync](#4-enable-freesync)
 5. [Fixing refresh rate for hybrid mode (Wayland)](#5-fixing-refresh-rate-for-hybrid-mode-wayland)
 6. [Fixing Brave restore session on shutdown](#6-fixing-brave-restore-session-on-shutdown)
-
+7. [Video hardware decoding in Chromium browsers](#7-video-hardware-decoding-in-chromium-browsers)
 
 
 ## 1. Existing guides:
 - [Lenovo Legion Linux](https://github.com/johnfanv2/LenovoLegionLinux) is for various sensors, drivers, power modes, fan curves and other legion specific stuff.
-- [Plasma vantage](https://store.kde.org/p/2150610) is a plasma widget for controling Legion specific settings.
+- [Plasma vantage](https://store.kde.org/p/2150610) is a plasma widget for controlling Legion specific settings.
 - https://github.com/cszach/linux-on-lenovo-legion?tab=readme-ov-file
 
 
 ## 2. Laptop speakers
 To make laptop speakers have better quality (to match sound in Windows), you can extract impulse response information from Windows. I used [this guide](https://github.com/shuhaowu/linux-thinkpad-speaker-improvements) to extract `.irs` file for my laptop, but any laptop works for this.
-To use .irs file set up any kind of sound effects software with convolver (EasyEffects/JamesDSP/...) and import .irs file to the convolver. Longer .irs files (500ms+) create noticable playback delay. Personaly I use 100ms sample with fade in and fade out applied to the irs.
+To use .irs file set up any kind of sound effects software with convolver (EasyEffects/JamesDSP/...) and import .irs file to the convolver. Longer .irs files (500ms+) create noticeable playback delay. Personally I use 100ms sample with fade in and fade out applied to the .irs.
 #### 2.1 EasyEffects profile
 I've added my profile for easy effects. After importing it you need to manually add correct .irs file in the convolver.
 
-## 3. Hybernate/Sleep fix
+## 3. Hibernate/Sleep fix
 [Some discussion over this](https://www.reddit.com/r/archlinux/comments/1g68lqc/the_latest_version_of_nvidiautils_now_supports/)
 [Since Nvidia driver 570](https://www.nvidia.com/en-us/drivers/details/240524/), when you're using systemd - you can try turning on these settings
 ```sh
 sudo nvim /etc/systemd/sleep.conf
 
-# Unncomment
+# Uncomment
 AllowSuspend=yes
 AllowHibernate=yes
 AllowSuspendThenHibernate=yes
 ```
 For older drivers some services are off by default.
-Pc may not suspend pc correctly, notifying it in `dmesg` that it fails to unload Nvidia drivers. To fix you need to enable Nvidia suspend services. [Source](https://bbs.archlinux.org/viewtopic.php?id=288181)
+PC may not suspend correctly, notifying it in `dmesg` that it fails to unload Nvidia drivers. To fix you need to enable Nvidia suspend services. [Source](https://bbs.archlinux.org/viewtopic.php?id=288181)
 ```sh
 sudo systemctl enable nvidia-suspend.service
 sudo systemctl enable nvidia-hibernate.service
 sudo systemctl enable nvidia-resume.service
 ```
 You can also try [Preserve video memory after suspend](https://wiki.archlinux.org/title/NVIDIA/Tips_and_tricks#Preserve_video_memory_after_suspend)
+
+For me hibernation works most of the time, but when opening laptop on battery power it sometimes break KDE and i have to restart.
 
 ## 4. Enable freesync
 ```sh
@@ -55,7 +57,7 @@ Currently, AMD iGPU driver generates wrong EDID file (used for describing displa
 Follow [this guide](EDID.md) to use the file during kernel load. 
 
 ### 6. Fixing Brave restore session on shutdown
-This is not lenovo specific, but rather KDE+Brave. On shutdown/restart it doesn't kill brave correctly, losing the current session. Systemd methods doesn't work, but KDE hook works here.
+This is not lenovo specific, but rather KDE+Brave. On shutdown/restart it doesn't kill brave correctly, losing the current session. Systemd methods don't work, but KDE hook works here.
 ```sh
 mkdir -p ~/.config/plasma-workspace/shutdown/
 cp pre-shutdown.sh ~/.config/plasma-workspace/shutdown/pre-shutdown.sh
@@ -91,4 +93,23 @@ To persist flags:
 --enable-features=AcceleratedVideoDecodeLinuxGL,AcceleratedVideoDecodeLinuxZeroCopyGL,VaapiOnNvidiaGPUs,VaapiIgnoreDriverChecks
 ```
 
-Warning: `libva-nvidia-driver` may break on Nvidia driver updates, as it uses unstable API's to use NVDEC. Follow info [in projects Github](https://github.com/elFarto/nvidia-vaapi-driver)
+Warning: `libva-nvidia-driver` may break on Nvidia driver updates, as it uses unstable APIs to use NVDEC. Follow info [in projects Github](https://github.com/elFarto/nvidia-vaapi-driver)
+
+#### 7.1 libva-nvidia-driver VP8 issue manual fix
+As of today VP8 videos in chromium are showing green corrupted video (Google Meets/Steam/Other) when using `AcceleratedVideoDecodeLinuxZeroCopyGL` option, but the bug is fixed in the master branch of the driver (still waiting for the release). So just need to build the driver manually instead of using one from the repository. Issue should be fixed when new driver version releases and is greater than `0.0.14`
+
+```sh
+#remove driver if its already installed
+sudo pacman -R libva-nvidia-driver
+
+#build
+git clone https://github.com/elFarto/nvidia-vaapi-driver.git
+cd nvidia-vaapi-driver
+meson setup build --prefix=/usr
+ninja -C build
+sudo ninja -C build install
+
+#when upstream is fixed - remove the driver and reinstall from repository
+sudo rm -f /usr/lib/dri/nvidia_drv_video.so
+sudo pacman -R libva-nvidia-driver
+```
