@@ -25,7 +25,7 @@ To use .irs file set up any kind of sound effects software with convolver (EasyE
 I've added my profile for easy effects. After importing it you need to manually add correct .irs file in the convolver.
 
 ## 3. Hibernate/Sleep fix
-[Some discussion over this](https://www.reddit.com/r/archlinux/comments/1g68lqc/the_latest_version_of_nvidiautils_now_supports/)
+[Some discussion](https://www.reddit.com/r/archlinux/comments/1g68lqc/the_latest_version_of_nvidiautils_now_supports/) regarding this topic.
 [Since Nvidia driver 570](https://www.nvidia.com/en-us/drivers/details/240524/), when you're using systemd - you can try turning on these settings
 ```sh
 sudo nvim /etc/systemd/sleep.conf
@@ -94,22 +94,3 @@ To persist flags:
 ```
 
 Warning: `libva-nvidia-driver` may break on Nvidia driver updates, as it uses unstable APIs to use NVDEC. Follow info [in projects Github](https://github.com/elFarto/nvidia-vaapi-driver)
-
-#### 7.1 libva-nvidia-driver VP8 issue manual fix
-As of today VP8 codec videos in chromium are showing up green and corrupted (Google Meets/Steam/Other) when using `AcceleratedVideoDecodeLinuxZeroCopyGL` option, but the bug is fixed in the master branch of the driver (still waiting for the release). So just need to build the driver manually instead of using one from the repository. Issue should be fixed when new driver version releases and is greater than `0.0.14`
-
-```sh
-#remove driver if its already installed
-sudo pacman -R libva-nvidia-driver
-
-#build
-git clone https://github.com/elFarto/nvidia-vaapi-driver.git
-cd nvidia-vaapi-driver
-meson setup build --prefix=/usr
-ninja -C build
-sudo ninja -C build install
-
-#when upstream is fixed - remove the driver and reinstall from repository
-sudo rm -f /usr/lib/dri/nvidia_drv_video.so
-sudo pacman -S libva-nvidia-driver
-```
